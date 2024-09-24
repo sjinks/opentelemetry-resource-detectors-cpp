@@ -97,4 +97,4 @@ int main()
 }
 ```
 
-**Note:** unline the OpenTelemetry JS SDK, the C++ SDK merges resources differently. In the JS SDK, `Resource.Merge()` overwrites old attributes. In the C++ SDK, it preserves old attributes.
+**Note:** unlike the OpenTelemetry JS SDK, the C++ SDK merges resources differently. In the JS SDK, `Resource.Merge()` overwrites old attributes. In the C++ SDK, it preserves old attributes.
