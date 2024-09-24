@@ -1,0 +1,63 @@
+name: SonarCloud
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+    env:
+      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: block
+          allowed-endpoints:
+            analysis-sensorcache-eu-central-1-prod.s3.amazonaws.com:443
+            api.github.com:443
+            api.nuget.org:443
+            api.sonarcloud.io:443
+            azure.archive.ubuntu.com:80
+            binaries.sonarsource.com:443
+            esm.ubuntu.com:443
+            github.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
+            scanner.sonarcloud.io:443
+            sonarcloud.io:443
+
+      - name: Check out code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+  
+      - name: Install sonar-scanner and build-wrapper
+        uses: SonarSource/sonarcloud-github-c-cpp@816b1822d71776ee0d32bc012e95024ec52ac1fc # v3.1.0
+
+      - name: Run build-wrapper
+        run: |
+          cmake -B build
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build
+
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
