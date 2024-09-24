@@ -77,12 +77,20 @@ int main()
     // Now that the resource is ready, pass it to providers
 
     auto exporter  = opentelemetry::exporter::trace::OStreamSpanExporterFactory::Create();
-    auto processor = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(std::move(exporter));
+    auto processor = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(
+        std::move(exporter)
+    );
 
     std::unique_ptr<opentelemetry::sdk::trace::TracerProvider> provider =
-        opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor), resource);  // <===
+        opentelemetry::sdk::trace::TracerProviderFactory::Create(
+            std::move(processor),
+            resource               // <===
+        );
 
-    const opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider> api_provider(provider.release());
+    const opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider> api_provider(
+        provider.release()
+    );
+
     opentelemetry::trace::Provider::SetTracerProvider(api_provider);
 
     // Your code goes here
