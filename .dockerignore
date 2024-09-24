@@ -1,0 +1,9 @@
+*
+!.clang-format
+!.clang-tidy
+!cmake
+!CMakeLists.txt
+!examples
+!include
+!src
+!test

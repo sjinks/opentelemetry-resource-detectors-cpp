@@ -1,0 +1,47 @@
+name: Set up dependencies
+description: Set up dependencies for the project
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ccache libgtest-dev
+
+    - name: Set OpenTelemetry version
+      shell: bash
+      run: echo "OPENTELEMETRY_CPP_VERSION=${OPENTELEMETRY_CPP_VERSION}" >> "${GITHUB_ENV}"
+      env:
+        # renovate: datasource=github-releases depName=open-telemetry/opentelemetry-cpp
+        OPENTELEMETRY_CPP_VERSION: v1.16.1
+
+    - name: Make /usr/local/include and /usr/local/lib writable
+      shell: bash
+      run: sudo chmod 0777 /usr/local/include /usr/local/lib
+
+    - name: Cache OpenTelemetry
+      id: cache-opentelemetry
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      with:
+        path: |
+          /usr/local/include/opentelemetry
+          /usr/local/lib/cmake/opentelemetry-cpp
+          !/usr/local/lib/libopentelemetry_resource_detectors.a
+          /usr/local/lib/libopentelemetry_*
+        key: ${{ runner.os }}-opentelemetry-${{ env.OPENTELEMETRY_CPP_VERSION }}
+
+    - name: Set up ccache
+      uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
+      if: steps.cache-opentelemetry.outputs.cache-hit != 'true'
+
+    - name: Install OpenTelemetry
+      shell: bash
+      run: |
+        cd /tmp
+        git clone https://github.com/open-telemetry/opentelemetry-cpp.git --depth=1 -b "${OPENTELEMETRY_CPP_VERSION}" --single-branch
+        cd opentelemetry-cpp
+        cmake -B build -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DWITH_DEPRECATED_SDK_FACTORY=OFF -DWITH_NO_DEPRECATED_CODE=ON -DWITH_OTLP_HTTP=OFF -DBUILD_TESTING=OFF -DWITH_BENCHMARK=OFF -DWITH_FUNC_TESTS=OFF -DWITH_EXAMPLES=OFF
+        cmake --build build -j2
+        sudo cmake --install build
+      if: steps.cache-opentelemetry.outputs.cache-hit != 'true'
