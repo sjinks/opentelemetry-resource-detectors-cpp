@@ -1,4 +1,4 @@
-#include "opentelemetry_resource_detectors/process_resource_detector.h"
+#include "opentelemetry/resource/wwa/process_resource_detector.h"
 
 #include <unistd.h>
 
@@ -6,7 +6,7 @@
 
 #include "process_utils.h"
 
-namespace wwa::opentelemetry {
+namespace wwa::opentelemetry::resource {
 
 ::opentelemetry::sdk::resource::Resource process_resource_detector::Detect()
 {
@@ -50,4 +50,4 @@ namespace wwa::opentelemetry {
     );
 }
 
-}  // namespace wwa::opentelemetry
+}  // namespace wwa::opentelemetry::resource

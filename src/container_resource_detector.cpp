@@ -1,4 +1,4 @@
-#include "opentelemetry_resource_detectors/container_resource_detector.h"
+#include "opentelemetry/resource/wwa/container_resource_detector.h"
 
 #include <fstream>
 #include <regex>
@@ -9,7 +9,7 @@
 
 #include "container_utils.h"
 
-namespace wwa::opentelemetry {
+namespace wwa::opentelemetry::resource {
 
 ::opentelemetry::sdk::resource::Resource container_resource_detector::Detect()
 {
@@ -36,4 +36,4 @@ namespace wwa::opentelemetry {
     );
 }
 
-}  // namespace wwa::opentelemetry
+}  // namespace wwa::opentelemetry::resource

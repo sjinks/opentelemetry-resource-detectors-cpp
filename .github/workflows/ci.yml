@@ -42,3 +42,13 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build
+
+      - name: Install
+        run: sudo cmake --install build
+
+      - name: Smoke test
+        run: |
+          cmake -B build
+          cmake --build build
+          ./build/ci
+        working-directory: ci
