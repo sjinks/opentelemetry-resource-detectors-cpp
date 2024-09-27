@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(opentelemetry_resource_detectors VERSION 1.0.0 LANGUAGES CXX)
+project(wwa_opentelemetry_resource_detectors VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 option(WITH_TESTING "Whether to enable tests" ON)
@@ -35,9 +35,9 @@ set(sources
 generate_export_header(${PROJECT_NAME})
 set(headers
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
-    include/${PROJECT_NAME}/container_resource_detector.h
-    include/${PROJECT_NAME}/os_resource_detector.h
-    include/${PROJECT_NAME}/process_resource_detector.h
+    include/opentelemetry/resource/wwa/container_resource_detector.h
+    include/opentelemetry/resource/wwa/os_resource_detector.h
+    include/opentelemetry/resource/wwa/process_resource_detector.h
 )
 
 target_sources(
@@ -105,13 +105,12 @@ if(INSTALL_RESOURCE_DETECTORS)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
+        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/opentelemetry/resource/wwa"
     )
 
     install(
         EXPORT ${PROJECT_NAME}-target
         FILE ${PROJECT_NAME}-target.cmake
-        NAMESPACE ${PROJECT_NAME}::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
     )
 

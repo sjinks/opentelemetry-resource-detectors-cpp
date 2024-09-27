@@ -7,7 +7,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y ccache libgtest-dev
+        sudo apt-get install -y ccache libgtest-dev nlohmann-json3-dev
 
     - name: Set OpenTelemetry version
       shell: bash
@@ -27,8 +27,8 @@ runs:
         path: |
           /usr/local/include/opentelemetry
           /usr/local/lib/cmake/opentelemetry-cpp
-          !/usr/local/lib/libopentelemetry_resource_detectors.a
           /usr/local/lib/libopentelemetry_*
+          /usr/local/lib/pkgconfig/opentelemetry_*.pc
         key: ${{ runner.os }}-opentelemetry-${{ env.OPENTELEMETRY_CPP_VERSION }}
 
     - name: Set up ccache

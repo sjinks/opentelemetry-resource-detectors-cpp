@@ -1,4 +1,4 @@
-#include "opentelemetry_resource_detectors/os_resource_detector.h"
+#include "opentelemetry/resource/wwa/os_resource_detector.h"
 
 #include <string>
 #include <string_view>
@@ -9,7 +9,7 @@
 
 #include "os_utils.h"
 
-namespace wwa::opentelemetry {
+namespace wwa::opentelemetry::resource {
 
 ::opentelemetry::sdk::resource::Resource os_resource_detector::Detect()
 {
@@ -31,4 +31,4 @@ namespace wwa::opentelemetry {
     );
 }
 
-}  // namespace wwa::opentelemetry
+}  // namespace wwa::opentelemetry::resource

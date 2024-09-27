@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(ci VERSION 1.0.0 LANGUAGES CXX)
+find_package(wwa_opentelemetry_resource_detectors CONFIG REQUIRED)
+find_package(nlohmann_json REQUIRED)
+add_executable(ci ../examples/example1.cpp)
+target_link_libraries(ci PRIVATE wwa::opentelemetry::resource_detectors nlohmann_json::nlohmann_json)
+target_compile_definitions(ci PRIVATE -DUSE_SYSTEM_INCLUDE)
