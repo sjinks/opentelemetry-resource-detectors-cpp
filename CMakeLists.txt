@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(wwa_opentelemetry_resource_detectors VERSION 1.0.0 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+project(wwa_opentelemetry_resource_detectors
+    VERSION 1.0.0
+    DESCRIPTION "Resource Detectors for OpenTelemetry"
+    HOMEPAGE_URL "https://github.com/sjinks/opentelemetry-resource-detectors-cpp"
+    LANGUAGES CXX
+)
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 option(WITH_TESTING "Whether to enable tests" ON)
@@ -131,5 +139,14 @@ if(INSTALL_RESOURCE_DETECTORS)
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
+
+    if(BUILD_SHARED_LIBS)
+        set(REQUIRES_SUFFIX ".private")
+    endif()
+    configure_file("${CMAKE_SOURCE_DIR}/cmake/pkg-config.pc.in" "${PROJECT_NAME}.pc" @ONLY)
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
     )
 endif()
