@@ -1,6 +1,7 @@
 #include "container_utils.h"
 
 #include <algorithm>
+#include <cstring>
 #include <istream>
 
 #include "string_utils.h"
@@ -31,19 +32,19 @@ std::string_view extract_container_id_cgroup_v1(std::string_view line)
     }
 
     if (starts_with(last_part, "crio-")) {
-        last_part = remove_prefix(last_part, "crio-");
+        last_part.remove_prefix(std::strlen("crio-"));
     }
     else if (starts_with(last_part, "docker-")) {
-        last_part = remove_prefix(last_part, "docker-");
+        last_part.remove_prefix(std::strlen("docker-"));
     }
     else if (starts_with(last_part, "libpod-")) {
-        last_part = remove_prefix(last_part, "libpod-");
+        last_part.remove_prefix(std::strlen("libpod-"));
     }
     else if (starts_with(last_part, "containerd-")) {
-        last_part = remove_prefix(last_part, "containerd-");
+        last_part.remove_prefix(std::strlen("containerd-"));
     }
     else if (starts_with(last_part, "cri-containerd-")) {
-        last_part = remove_prefix(last_part, "cri-containerd-");
+        last_part.remove_prefix(std::strlen("cri-containerd-"));
     }
 
     if (const auto idx = last_part.rfind('.'); idx != std::string_view::npos) {

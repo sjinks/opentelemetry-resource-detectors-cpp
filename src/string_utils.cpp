@@ -19,17 +19,20 @@ std::vector<std::string_view> split(std::string_view str, char delim)
 
 bool starts_with(std::string_view str, std::string_view prefix)
 {
+#if __cplusplus >= 202002L
+    return str.starts_with(prefix);
+#else
     return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
+#endif
 }
 
 bool ends_with(std::string_view str, std::string_view suffix)
 {
+#if __cplusplus >= 202002L
+    return str.ends_with(suffix);
+#else
     return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-std::string_view remove_prefix(std::string_view s, std::string_view prefix)
-{
-    return s.substr(prefix.length());
+#endif
 }
 
 std::string_view nth_word(std::string_view str, std::size_t n)
