@@ -9,7 +9,6 @@ add_executable(
     test_string_utils
     string_utils/ends_with.cpp
     string_utils/nth_word.cpp
-    string_utils/remove_prefix.cpp
     string_utils/split.cpp
     string_utils/starts_with.cpp
 )
