@@ -4,7 +4,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
     wwa_opentelemetry_resource_detectors
-    VERSION 1.0.0
+    VERSION 1.0.2
     DESCRIPTION "Resource Detectors for OpenTelemetry"
     HOMEPAGE_URL "https://github.com/sjinks/opentelemetry-resource-detectors-cpp"
     LANGUAGES CXX
