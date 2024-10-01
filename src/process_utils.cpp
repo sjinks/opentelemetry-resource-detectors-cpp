@@ -1,7 +1,6 @@
 #include "process_utils.h"
 
 #include <fstream>
-#include <memory>
 
 #include <pwd.h>
 #include <unistd.h>
@@ -80,16 +79,16 @@ std::vector<std::string> parse_zero_delimited_stream(std::istream& stream)
 
 std::string username_by_uid(uid_t uid)
 {
-    static long int bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    constexpr auto BUF_FALLBACK_SIZE = 16384;
+    static long int bufsize          = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize < 0) {
-        bufsize = 16384;  // NOLINT(*-magic-numbers)
+        bufsize = BUF_FALLBACK_SIZE;
     }
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
-    auto buf = std::make_unique<char[]>(bufsize);
+    std::string buf(static_cast<std::size_t>(bufsize), '\0');
     passwd pwd{};
     passwd* result = nullptr;
-    getpwuid_r(uid, &pwd, buf.get(), static_cast<std::size_t>(bufsize), &result);
+    getpwuid_r(uid, &pwd, buf.data(), static_cast<std::size_t>(bufsize), &result);
     if (result != nullptr) {
         return result->pw_name;
     }
