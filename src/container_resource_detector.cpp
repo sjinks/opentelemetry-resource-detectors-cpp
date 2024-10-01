@@ -13,6 +13,9 @@ namespace wwa::opentelemetry::resource {
 
 ::opentelemetry::sdk::resource::Resource container_resource_detector::Detect()
 {
+#ifndef __linux__
+    return ::opentelemetry::sdk::resource::Resource::GetEmpty();
+#else
     std::string cid;
     if (std::ifstream f("/proc/self/mountinfo"); f) {
         cid = get_container_id_from_cgroup_v2(f);
@@ -34,6 +37,7 @@ namespace wwa::opentelemetry::resource {
     return ::opentelemetry::sdk::resource::Resource::Create(
         attrs, ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl
     );
+#endif
 }
 
 }  // namespace wwa::opentelemetry::resource

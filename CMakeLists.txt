@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(wwa_opentelemetry_resource_detectors
+project(
+    wwa_opentelemetry_resource_detectors
     VERSION 1.0.0
     DESCRIPTION "Resource Detectors for OpenTelemetry"
     HOMEPAGE_URL "https://github.com/sjinks/opentelemetry-resource-detectors-cpp"
@@ -29,23 +30,36 @@ target_sources(
         src/string_utils.cpp
 )
 
+set_target_properties(
+    utils
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+        POSITION_INDEPENDENT_CODE ON
+)
+
+target_link_libraries(utils PUBLIC opentelemetry-cpp::resources)
+
 add_library(helpers STATIC $<TARGET_OBJECTS:utils>)
 target_include_directories(helpers PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
 add_library(${PROJECT_NAME})
 
-set(sources
-    src/container_resource_detector.cpp
-    src/os_resource_detector.cpp
-    src/process_resource_detector.cpp
+set(
+    sources
+        src/container_resource_detector.cpp
+        src/os_resource_detector.cpp
+        src/process_resource_detector.cpp
 )
 
 generate_export_header(${PROJECT_NAME})
-set(headers
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
-    include/opentelemetry/resource/wwa/container_resource_detector.h
-    include/opentelemetry/resource/wwa/os_resource_detector.h
-    include/opentelemetry/resource/wwa/process_resource_detector.h
+set(
+    headers
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
+        include/opentelemetry/resource/wwa/container_resource_detector.h
+        include/opentelemetry/resource/wwa/os_resource_detector.h
+        include/opentelemetry/resource/wwa/process_resource_detector.h
 )
 
 target_sources(
@@ -74,7 +88,8 @@ if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -DOPENTELEMETRY_RESOURCE_DETECTORS_STATIC_DEFINE)
 endif()
 
-target_include_directories(${PROJECT_NAME}
+target_include_directories(
+    ${PROJECT_NAME}
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

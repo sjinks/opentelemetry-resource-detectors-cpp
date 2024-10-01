@@ -6,7 +6,6 @@ target_link_libraries(
     example2
     PRIVATE
         ${PROJECT_NAME}
-        opentelemetry-cpp::trace
         opentelemetry-cpp::ostream_span_exporter
         nlohmann_json::nlohmann_json
 )
