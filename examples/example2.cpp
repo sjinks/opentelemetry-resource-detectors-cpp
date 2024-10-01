@@ -51,8 +51,9 @@ int main()  // NOLINT(bugprone-exception-escape)
     auto exporter  = opentelemetry::exporter::trace::OStreamSpanExporterFactory::Create();
     auto processor = opentelemetry::sdk::trace::SimpleSpanProcessorFactory::Create(std::move(exporter));
 
-    std::unique_ptr<opentelemetry::sdk::trace::TracerProvider> provider =
-        opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor), resource);  // <===
+    // ***
+    auto provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor), resource);
+    // ***
 
     const opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider> api_provider(provider.release());
     opentelemetry::trace::Provider::SetTracerProvider(api_provider);

@@ -81,7 +81,7 @@ int main()
         std::move(exporter)
     );
 
-    std::unique_ptr<opentelemetry::sdk::trace::TracerProvider> provider =
+    auto provider =
         opentelemetry::sdk::trace::TracerProviderFactory::Create(
             std::move(processor),
             resource               // <===

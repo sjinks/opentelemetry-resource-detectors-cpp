@@ -23,23 +23,34 @@ namespace wwa::opentelemetry::resource {
         isatty(STDIN_FILENO) == 1 || isatty(STDOUT_FILENO) == 1 || isatty(STDERR_FILENO) == 1;
     attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSessionLeaderPid] = getsid(0);
 
+#ifdef __APPLE__
+    uid_t ruid = getuid();
+    uid_t euid = geteuid();
+
+    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserId] = ruid;
+    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserId]     = euid;
+#else
     uid_t ruid;  // NOLINT(*-init-variables)
     uid_t euid;  // NOLINT(*-init-variables)
     uid_t suid;  // NOLINT(*-init-variables)
+
     if (getresuid(&ruid, &euid, &suid) == 0) {
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserId]  = ruid;
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserId] = suid;
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserId]      = euid;
     }
+#endif
 
     if (const auto username = username_by_uid(ruid); !username.empty()) {
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName] = username;
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner]        = username;
     }
 
+#ifndef __APPLE__
     if (const auto username = username_by_uid(suid); !username.empty()) {
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserName] = username;
     }
+#endif
 
     if (const auto username = username_by_uid(euid); !username.empty()) {
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserName] = username;
