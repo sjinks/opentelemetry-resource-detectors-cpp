@@ -16,8 +16,6 @@ option(WITH_TESTING "Whether to enable tests" ON)
 option(WITH_EXAMPLES "Whether to enable examples" ON)
 option(INSTALL_RESOURCE_DETECTORS "Whether to install Resource Detectors" ON)
 
-include(GenerateExportHeader)
-
 find_package(opentelemetry-cpp CONFIG REQUIRED)
 
 add_library(utils OBJECT)
@@ -53,10 +51,9 @@ set(
         src/process_resource_detector.cpp
 )
 
-generate_export_header(${PROJECT_NAME})
 set(
     headers
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
+        include/opentelemetry/resource/wwa/export.h
         include/opentelemetry/resource/wwa/container_resource_detector.h
         include/opentelemetry/resource/wwa/os_resource_detector.h
         include/opentelemetry/resource/wwa/process_resource_detector.h
@@ -93,9 +90,6 @@ target_include_directories(
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    PRIVATE
-        ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 if(WITH_TESTING)

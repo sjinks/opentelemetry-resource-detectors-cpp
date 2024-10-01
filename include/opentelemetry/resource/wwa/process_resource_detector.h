@@ -4,7 +4,7 @@
 #include <opentelemetry/sdk/resource/resource.h>
 #include <opentelemetry/sdk/resource/resource_detector.h>
 
-#include "wwa_opentelemetry_resource_detectors_export.h"
+#include "export.h"
 
 namespace wwa::opentelemetry::resource {
 
