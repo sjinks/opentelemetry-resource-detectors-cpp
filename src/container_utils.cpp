@@ -6,6 +6,24 @@
 
 #include "string_utils.h"
 
+namespace {
+
+using extractor_t = std::string_view (*)(std::string_view);
+
+std::string get_container_id(std::istream& stream, extractor_t extractor)
+{
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (const auto cid = extractor(line); !cid.empty()) {
+            return std::string(cid);
+        }
+    }
+
+    return {};
+}
+
+}  // namespace
+
 std::string_view extract_container_id_cgroup_v1(std::string_view line)
 {
     // minikube+docker kubernetes cluster
@@ -90,20 +108,6 @@ std::string_view extract_container_id_cgroup_v2(std::string_view line)
 
         if (it != parts.end()) {
             return *(it + 1);
-        }
-    }
-
-    return {};
-}
-
-using extractor_t = std::string_view (*)(std::string_view);
-
-std::string get_container_id(std::istream& stream, extractor_t extractor)
-{
-    std::string line;
-    while (std::getline(stream, line)) {
-        if (const auto cid = extractor(line); !cid.empty()) {
-            return std::string(cid);
         }
     }
 
