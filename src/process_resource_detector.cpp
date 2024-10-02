@@ -9,6 +9,8 @@
 
 #    include <fcntl.h>
 #    include <io.h>
+#    include <processenv.h>
+#    include <tlhelp32.h>
 #endif
 
 #include <opentelemetry/sdk/resource/semantic_conventions.h>
@@ -23,15 +25,43 @@ int isatty(int fd)
     DWORD fileType = GetFileType(reinterpret_cast<HANDLE>(_get_osfhandle(fd)));
     return fileType == FILE_TYPE_CHAR ? 1 : 0;
 }
+
+DWORD getppid(DWORD pid)
+{
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    DWORD parentPid = 0;
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            if (pe32.th32ProcessID == pid) {
+                parentPid = pe32.th32ParentProcessID;
+                break;
+            }
+        } while (Process32Next(hSnapshot, &pe32));
+    }
+
+    CloseHandle(hSnapshot);
+    return parentPid;
+}
 #endif
 
 ::opentelemetry::sdk::resource::Resource process_resource_detector::Detect()
 {
     ::opentelemetry::sdk::resource::ResourceAttributes attrs;
 
+#ifndef _WIN32
     if (const auto cmdline = get_command_line_args(); !cmdline.empty()) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine] = cmdline;
+        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommand]     = cmdline[0];
+        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandArgs] = cmdline;
     }
+#else
+    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine] = GetCommandLine();
+#endif
 
 #ifndef _WIN32
     attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessPid]            = getpid();
@@ -43,6 +73,8 @@ int isatty(int fd)
 #else
     attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessPid] =
         static_cast<std::int64_t>(GetCurrentProcessId());
+    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessParentPid] =
+        static_cast<std::int64_t>(getppid(GetCurrentProcessId()));
 
     int stdin_fileno  = _fileno(stdin);
     int stdout_fileno = _fileno(stdout);
@@ -89,8 +121,9 @@ int isatty(int fd)
 #else
     std::string username(256, '\0');
     if (auto size = static_cast<DWORD>(username.size()); GetUserNameA(username.data(), &size)) {
-        username.resize(size);
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserName] = username;
+        username.resize(size - 1);
+        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName] = username;
+        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner]        = username;
     }
 #endif
 

@@ -37,17 +37,17 @@ namespace wwa::opentelemetry::resource {
     switch (si.wProcessorArchitecture) {
         case PROCESSOR_ARCHITECTURE_AMD64:
             attrs[::opentelemetry::sdk::resource::SemanticConventions::kHostArch] =
-                ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64;
+                std::string(::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64);
             break;
 
         case PROCESSOR_ARCHITECTURE_INTEL:
             attrs[::opentelemetry::sdk::resource::SemanticConventions::kHostArch] =
-                ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86;
+                std::string(::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86);
             break;
 
         case PROCESSOR_ARCHITECTURE_ARM64:
             attrs[::opentelemetry::sdk::resource::SemanticConventions::kHostArch] =
-                ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64;
+                std::string(::opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64);
             break;
 
         default:
@@ -61,7 +61,7 @@ namespace wwa::opentelemetry::resource {
     }
 
     attrs[::opentelemetry::sdk::resource::SemanticConventions::kOsType] =
-        ::opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kWindows;
+        std::string(::opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kWindows);
 
     OSVERSIONINFO osvi{};
     osvi.dwOSVersionInfoSize = sizeof(osvi);

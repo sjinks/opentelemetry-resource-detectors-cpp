@@ -8,8 +8,31 @@ Resource detectors for OpenTelemetry (C++).
 
 The library provides the following resource detectors:
 * [container](https://opentelemetry.io/docs/specs/semconv/resource/container/) (`container.id`);
-* [process](https://opentelemetry.io/docs/specs/semconv/resource/process/) (`process.command_line`, `process.group_leader.pid`, `process.interactive`, `process.parent_pid`, `process.pid`, `process.real_user.id`, `process.real_user.name`, `process.saved_user.id`, `process.saved_user.name`, `process.session_leader.pid`, `process.user.id`, `process.user.name`);
+* [process](https://opentelemetry.io/docs/specs/semconv/resource/process/) (`process.command_line`/`process.command` and `process.command_args`, `process.group_leader.pid`, `process.interactive`, `process.owner`, `process.parent_pid`, `process.pid`, `process.real_user.id`, `process.real_user.name`, `process.saved_user.id`, `process.saved_user.name`, `process.session_leader.pid`, `process.user.id`, `process.user.name`);
 * [OS](https://opentelemetry.io/docs/specs/semconv/resource/os/) (`os.type`, `os.version`) and [host](https://opentelemetry.io/docs/specs/semconv/resource/host/) (`host.arch`, `host.name`).
+
+| Resource                     | Supported OSes          |
+|------------------------------|-------------------------|
+| `container.id`               | Linux                   |
+| `process.command`            | Linux, MacOS            |
+| `process.command_args`       | Linux, MacOS            |
+| `process.command_line`       | Windows                 |
+| `process.group_leader.pid`   | Linux, MacOS            |
+| `process.interactive`        | Linux, MacOS, Windows   |
+| `process.owner`              | Linux, MacOS, Windows   |
+| `process.parent_pid`         | Linux, MacOS, Windows   |
+| `process.pid`                | Linux, MacOS, Windows   |
+| `process.real_user.id`       | Linux, MacOS            |
+| `process.real_user.name`     | Linux, MacOS, Windows   |
+| `process.saved_user.id`      | Linux                   |
+| `process.saved_user.name`    | Linux                   |
+| `process.session_leader.pid` | Linux, MacOS            |
+| `process.user.id`            | Linux, MacOS            |
+| `process.user.name`          | Linux, MacOS            |
+| `os.type`                    | Linux, MacOS, Windows   |
+| `os.version`                 | Linux, MacOS, Windows   |
+| `host.arch`                  | Linux, MacOS, Windows   |
+| `host.name`                  | Linux, MacOS, Windows   |
 
 ## Installation
 
