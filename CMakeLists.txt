@@ -16,7 +16,17 @@ option(WITH_TESTING "Whether to enable tests" ON)
 option(WITH_EXAMPLES "Whether to enable examples" ON)
 option(INSTALL_RESOURCE_DETECTORS "Whether to install Resource Detectors" ON)
 
+include(FetchContent)
+
 find_package(opentelemetry-cpp CONFIG REQUIRED)
+
+FetchContent_Declare(
+    qlibs_mph
+    GIT_REPOSITORY https://github.com/qlibs/mph
+    GIT_TAG v5.0.2
+)
+
+FetchContent_MakeAvailable(qlibs_mph)
 
 add_library(utils OBJECT)
 target_sources(
@@ -31,13 +41,19 @@ target_sources(
 set_target_properties(
     utils
     PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
         POSITION_INDEPENDENT_CODE ON
 )
 
-target_link_libraries(utils PUBLIC opentelemetry-cpp::resources)
+target_link_libraries(
+    utils
+    PUBLIC opentelemetry-cpp::resources
+    PRIVATE qlibs_mph
+)
+
+target_include_directories(utils PUBLIC ${qlibs_mph_SOURCE_DIR})
 
 add_library(helpers STATIC $<TARGET_OBJECTS:utils>)
 target_include_directories(helpers PUBLIC ${CMAKE_SOURCE_DIR}/src)
