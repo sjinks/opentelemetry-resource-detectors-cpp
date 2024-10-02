@@ -2,8 +2,10 @@
 
 #include <fstream>
 
-#include <pwd.h>
-#include <unistd.h>
+#ifndef _WIN32
+#    include <pwd.h>
+#    include <unistd.h>
+#endif
 
 #ifdef __APPLE__
 #    include <array>
@@ -77,6 +79,7 @@ std::vector<std::string> parse_zero_delimited_stream(std::istream& stream)
     return result;
 }
 
+#ifndef _WIN32
 std::string username_by_uid(uid_t uid)
 {
     constexpr auto BUF_FALLBACK_SIZE = 16384;
@@ -95,3 +98,4 @@ std::string username_by_uid(uid_t uid)
 
     return {};
 }
+#endif
