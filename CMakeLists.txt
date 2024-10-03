@@ -38,15 +38,6 @@ target_sources(
         src/string_utils.cpp
 )
 
-set_target_properties(
-    utils
-    PROPERTIES
-        CXX_STANDARD 20
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
-        POSITION_INDEPENDENT_CODE ON
-)
-
 target_link_libraries(
     utils
     PUBLIC opentelemetry-cpp::resources
@@ -57,6 +48,15 @@ target_include_directories(utils PUBLIC ${qlibs_mph_SOURCE_DIR})
 
 add_library(helpers STATIC $<TARGET_OBJECTS:utils>)
 target_include_directories(helpers PUBLIC ${CMAKE_SOURCE_DIR}/src)
+
+set_target_properties(
+    utils helpers
+    PROPERTIES
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+        POSITION_INDEPENDENT_CODE ON
+)
 
 add_library(${PROJECT_NAME})
 
@@ -98,7 +98,7 @@ set_target_properties(
 )
 
 if(NOT BUILD_SHARED_LIBS)
-    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS -DWWA_OPENTELEMETRY_RESOURCE_DETECTORS_STATIC_DEFINE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC WWA_OPENTELEMETRY_RESOURCE_DETECTORS_STATIC_DEFINE)
 endif()
 
 target_include_directories(

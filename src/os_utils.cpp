@@ -4,7 +4,11 @@
 #include <string_view>
 #include <utility>
 
-#if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ && __cplusplus >= 202002L
+#if defined(__clang__) && __clang_major__ < 15 || defined(__GNUC__) && __GNUC__ < 12
+#    define DISABLE_MPH
+#endif
+
+#if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ && __cplusplus >= 202002L && !defined(DISABLE_MPH)
 #    include <mph>
 #    define USE_MPH
 #    define CONTAINER           std::array

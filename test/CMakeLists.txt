@@ -27,6 +27,15 @@ add_executable(
 )
 target_link_libraries(test_process_utils PRIVATE helpers GTest::gtest_main)
 
+set_target_properties(
+    test_container_utils test_string_utils test_os_utils test_process_utils
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+        COMPILE_DEFINITIONS WWA_OPENTELEMETRY_RESOURCE_DETECTORS_STATIC_DEFINE
+)
+
 include(GoogleTest)
 gtest_discover_tests(test_string_utils)
 gtest_discover_tests(test_container_utils)
