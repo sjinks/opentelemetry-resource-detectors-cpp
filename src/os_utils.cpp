@@ -4,7 +4,7 @@
 #include <string_view>
 #include <utility>
 
-#if defined(__clang__) && __clang_major__ < 15 || defined(__GNUC__) && __GNUC__ < 12
+#if (defined(__clang__) && __clang_major__ < 15) || (defined(__GNUC__) && __GNUC__ < 12) || defined(__MINGW32__)
 #    define DISABLE_MPH
 #endif
 
