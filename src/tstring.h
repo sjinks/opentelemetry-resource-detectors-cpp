@@ -3,7 +3,7 @@
 
 #ifdef _WIN32
 #    include <string>
-#    include <windows.h>
+#    include <tchar.h>
 
 inline std::string convert(LPCTSTR s)
 {

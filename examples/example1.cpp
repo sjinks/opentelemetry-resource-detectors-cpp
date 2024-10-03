@@ -1,3 +1,11 @@
+#ifdef _WIN32
+#    include <windows.h>
+#    include <tchar.h>
+#    define MAIN _tmain
+#else
+#    define MAIN main
+#endif
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -29,7 +37,7 @@ struct adl_serializer<opentelemetry::sdk::common::OwnedAttributeValue> {
 
 }  // namespace nlohmann
 
-int main()  // NOLINT(bugprone-exception-escape)
+int MAIN()  // NOLINT(bugprone-exception-escape)
 {
     std::vector<std::unique_ptr<opentelemetry::sdk::resource::ResourceDetector>> detectors;
     detectors.emplace_back(std::make_unique<wwa::opentelemetry::resource::container_resource_detector>());

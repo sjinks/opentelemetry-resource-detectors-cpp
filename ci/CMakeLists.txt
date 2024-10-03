@@ -21,6 +21,11 @@ set_target_properties(
         COMPILE_DEFINITIONS WWA_OPENTELEMETRY_RESOURCE_DETECTORS_STATIC_DEFINE
 )
 
+if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_compile_definitions(ci-cmake PRIVATE -D_UNICODE)
+    set_target_properties(ci-cmake PROPERTIES LINK_FLAGS "/ENTRY:wmainCRTStartup")
+endif()
+
 if(NOT WIN32)
     include(FindPkgConfig)
     pkg_check_modules(wwa_opentelemetry_resource_detectors REQUIRED IMPORTED_TARGET wwa_opentelemetry_resource_detectors)
