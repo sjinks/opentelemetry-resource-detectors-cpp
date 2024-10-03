@@ -3,14 +3,18 @@
 #ifndef _WIN32
 #    include <unistd.h>
 #else
+#    include <array>
 #    include <cstdio>
 
 #    include <windows.h>
 
+#    include <Lmcons.h>
 #    include <fcntl.h>
 #    include <io.h>
 #    include <processenv.h>
 #    include <tlhelp32.h>
+
+#    include "tstring.h"
 #endif
 
 #include <opentelemetry/sdk/resource/semantic_conventions.h>
@@ -60,7 +64,7 @@ DWORD getppid(DWORD pid)
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandArgs] = cmdline;
     }
 #else
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine] = GetCommandLine();
+    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine] = convert(GetCommandLine());
 #endif
 
 #ifndef _WIN32
@@ -119,9 +123,9 @@ DWORD getppid(DWORD pid)
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserName] = username;
     }
 #else
-    std::string username(256, '\0');
-    if (auto size = static_cast<DWORD>(username.size()); GetUserNameA(username.data(), &size)) {
-        username.resize(size - 1);
+    std::array<TCHAR, UNLEN + 1> buf;
+    if (auto size = static_cast<DWORD>(buf.size()); GetUserName(buf.data(), &size)) {
+        std::string username                                                             = convert(buf.data());
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName] = username;
         attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner]        = username;
     }

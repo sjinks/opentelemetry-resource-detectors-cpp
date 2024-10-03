@@ -6,7 +6,11 @@
 #ifndef _WIN32
 #    include <sys/utsname.h>
 #else
+#    include <array>
+
 #    include <windows.h>
+
+#    include "tstring.h"
 #endif
 
 #include <opentelemetry/sdk/resource/semantic_conventions.h>
@@ -54,10 +58,9 @@ namespace wwa::opentelemetry::resource {
             break;
     }
 
-    std::string computerName(256, '\0');
-    if (auto size = static_cast<DWORD>(computerName.size()); GetComputerName(computerName.data(), &size)) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kHostName] =
-            std::string{computerName.c_str(), static_cast<std::size_t>(size)};
+    std::array<TCHAR, MAX_COMPUTERNAME_LENGTH + 1> buf;
+    if (auto size = static_cast<DWORD>(buf.size()); GetComputerName(buf.data(), &size)) {
+        attrs[::opentelemetry::sdk::resource::SemanticConventions::kHostName] = convert(buf.data());
     }
 
     attrs[::opentelemetry::sdk::resource::SemanticConventions::kOsType] =
