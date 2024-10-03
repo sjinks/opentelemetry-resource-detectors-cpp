@@ -37,7 +37,9 @@ set_target_properties(
 )
 
 include(GoogleTest)
-gtest_discover_tests(test_string_utils)
-gtest_discover_tests(test_container_utils)
-gtest_discover_tests(test_os_utils)
-gtest_discover_tests(test_process_utils)
+if(NOT CMAKE_CROSSCOMPILING)
+    gtest_discover_tests(test_string_utils)
+    gtest_discover_tests(test_container_utils)
+    gtest_discover_tests(test_os_utils)
+    gtest_discover_tests(test_process_utils)
+endif()
