@@ -8,9 +8,9 @@
 
 #    include <windows.h>
 
-#    include <Lmcons.h>
 #    include <fcntl.h>
 #    include <io.h>
+#    include <lmcons.h>
 #    include <processenv.h>
 #    include <tlhelp32.h>
 
