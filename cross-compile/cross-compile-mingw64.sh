@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # dependencies: powershell, mingw-w64
 # may need to set WINEPATH="/usr/x86_64-w64-mingw32/lib;/usr/lib/gcc/x86_64-w64-mingw32/13-win32/" to run executables
 
