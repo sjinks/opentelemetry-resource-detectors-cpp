@@ -37,12 +37,18 @@ namespace wwa::opentelemetry::resource {
     using ::opentelemetry::sdk::resource::SemanticConventions::kOsType;
     using ::opentelemetry::sdk::resource::SemanticConventions::kOsVersion;
     using ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl;
+
+    using namespace ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues;
+    using namespace ::opentelemetry::sdk::resource::SemanticConventions::OsTypeValues;
 #else
     using ::opentelemetry::semconv::host::kHostArch;
     using ::opentelemetry::semconv::host::kHostName;
     using ::opentelemetry::semconv::kSchemaUrl;
     using ::opentelemetry::semconv::os::kOsType;
     using ::opentelemetry::semconv::os::kOsVersion;
+
+    using namespace ::opentelemetry::semconv::host::HostArchValues;
+    using namespace ::opentelemetry::semconv::os::OsTypeValues;
 #endif
 
 #ifndef _WIN32
@@ -62,15 +68,15 @@ namespace wwa::opentelemetry::resource {
     GetSystemInfo(&si);
     switch (si.wProcessorArchitecture) {
         case PROCESSOR_ARCHITECTURE_AMD64:
-            attrs[kHostArch] = std::string(HostArchValues::kAmd64);
+            attrs[kHostArch] = std::string(kAmd64);
             break;
 
         case PROCESSOR_ARCHITECTURE_INTEL:
-            attrs[kHostArch] = std::string(HostArchValues::kX86);
+            attrs[kHostArch] = std::string(kX86);
             break;
 
         case PROCESSOR_ARCHITECTURE_ARM64:
-            attrs[kHostArch] = std::string(HostArchValues::kArm64);
+            attrs[kHostArch] = std::string(kArm64);
             break;
 
         default:
@@ -82,7 +88,7 @@ namespace wwa::opentelemetry::resource {
         attrs[kHostName] = convert(buf.data());
     }
 
-    attrs[kOsType] = std::string(OsTypeValues::kWindows);
+    attrs[kOsType] = std::string(kWindows);
 
     OSVERSIONINFO osvi{};
     osvi.dwOSVersionInfoSize = sizeof(osvi);
