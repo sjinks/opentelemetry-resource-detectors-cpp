@@ -1,11 +1,23 @@
 #include <tuple>
 
 #include <gtest/gtest.h>
-#include <opentelemetry/sdk/resource/semantic_conventions.h>
+
+#include <opentelemetry/version.h>
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+#    include <opentelemetry/sdk/resource/semantic_conventions.h>
+#else
+#    include <opentelemetry/semconv/incubating/host_attributes.h>
+#endif
 
 #include "os_utils.h"
 
 class GetHostArchTest : public testing::TestWithParam<std::tuple<std::string, std::string>> {};
+
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+using namespace ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues;
+#else
+using namespace ::opentelemetry::semconv::host::HostArchValues;
+#endif
 
 TEST_P(GetHostArchTest, get_host_arch)
 {
@@ -21,24 +33,24 @@ INSTANTIATE_TEST_SUITE_P(
     Table,
     GetHostArchTest,
     testing::Values(
-        std::make_tuple("x86_64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64),
-        std::make_tuple("amd64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64),
-        std::make_tuple("aarch64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64),
-        std::make_tuple("arm64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64),
-        std::make_tuple("arm", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm32),
-        std::make_tuple("armv7l", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm32),
-        std::make_tuple("ppc", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc32),
-        std::make_tuple("ppc64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc64),
-        std::make_tuple("ppc64le", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc64),
-        std::make_tuple("s390x", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kS390x),
-        std::make_tuple("i386", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("i486", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("i586", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("i686", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("x86", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("i86pc", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("x86pc", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86),
-        std::make_tuple("ia64", opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kIa64),
+        std::make_tuple("x86_64", kAmd64),
+        std::make_tuple("amd64", kAmd64),
+        std::make_tuple("aarch64", kArm64),
+        std::make_tuple("arm64", kArm64),
+        std::make_tuple("arm", kArm32),
+        std::make_tuple("armv7l", kArm32),
+        std::make_tuple("ppc", kPpc32),
+        std::make_tuple("ppc64", kPpc64),
+        std::make_tuple("ppc64le", kPpc64),
+        std::make_tuple("s390x", kS390x),
+        std::make_tuple("i386", kX86),
+        std::make_tuple("i486", kX86),
+        std::make_tuple("i586", kX86),
+        std::make_tuple("i686", kX86),
+        std::make_tuple("x86", kX86),
+        std::make_tuple("i86pc", kX86),
+        std::make_tuple("x86pc", kX86),
+        std::make_tuple("ia64", kIa64),
         std::make_tuple("UNKNOWN", "UNKNOWN")
     )
 );
