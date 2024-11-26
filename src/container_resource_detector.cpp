@@ -1,11 +1,16 @@
 #include "opentelemetry/resource/wwa/container_resource_detector.h"
 
 #include <fstream>
-#include <regex>
-#include <stdexcept>
 #include <string>
 
-#include <opentelemetry/sdk/resource/semantic_conventions.h>
+#include <opentelemetry/version.h>
+
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+#    include <opentelemetry/sdk/resource/semantic_conventions.h>
+#else
+#    include <opentelemetry/semconv/incubating/container_attributes.h>
+#    include <opentelemetry/semconv/schema_url.h>
+#endif
 
 #include "container_utils.h"
 
@@ -31,12 +36,18 @@ namespace wwa::opentelemetry::resource {
         return ::opentelemetry::sdk::resource::Resource::GetEmpty();
     }
 
-    ::opentelemetry::sdk::resource::ResourceAttributes attrs;
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kContainerId] = cid;
+#    if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+    using ::opentelemetry::sdk::resource::SemanticConventions::kContainerId;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl;
+#    else
+    using ::opentelemetry::semconv::container::kContainerId;
+    using ::opentelemetry::semconv::kSchemaUrl;
+#    endif
 
-    return ::opentelemetry::sdk::resource::Resource::Create(
-        attrs, ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl
-    );
+    ::opentelemetry::sdk::resource::ResourceAttributes attrs;
+    attrs[kContainerId] = cid;
+
+    return ::opentelemetry::sdk::resource::Resource::Create(attrs, kSchemaUrl);
 #endif
 }
 

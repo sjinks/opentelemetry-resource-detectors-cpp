@@ -17,7 +17,14 @@
 #    include "tstring.h"
 #endif
 
-#include <opentelemetry/sdk/resource/semantic_conventions.h>
+#include <opentelemetry/version.h>
+
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+#    include <opentelemetry/sdk/resource/semantic_conventions.h>
+#else
+#    include <opentelemetry/semconv/incubating/process_attributes.h>
+#    include <opentelemetry/semconv/schema_url.h>
+#endif
 
 #include "process_utils.h"
 
@@ -58,82 +65,113 @@ DWORD getppid(DWORD pid)
 {
     ::opentelemetry::sdk::resource::ResourceAttributes attrs;
 
-#ifndef _WIN32
-    if (const auto cmdline = get_command_line_args(); !cmdline.empty()) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommand]     = cmdline[0];
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandArgs] = cmdline;
-    }
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessCommand;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandArgs;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessGroupLeaderPid;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessInteractive;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessParentPid;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessPid;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserId;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserId;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserName;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessSessionLeaderPid;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessUserId;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kProcessUserName;
+    using ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl;
 #else
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessCommandLine] = convert(GetCommandLine());
+    using ::opentelemetry::semconv::kSchemaUrl;
+    using ::opentelemetry::semconv::process::kProcessCommand;
+    using ::opentelemetry::semconv::process::kProcessCommandArgs;
+    using ::opentelemetry::semconv::process::kProcessCommandLine;
+    using ::opentelemetry::semconv::process::kProcessGroupLeaderPid;
+    using ::opentelemetry::semconv::process::kProcessInteractive;
+    using ::opentelemetry::semconv::process::kProcessOwner;
+    using ::opentelemetry::semconv::process::kProcessParentPid;
+    using ::opentelemetry::semconv::process::kProcessPid;
+    using ::opentelemetry::semconv::process::kProcessRealUserId;
+    using ::opentelemetry::semconv::process::kProcessRealUserName;
+    using ::opentelemetry::semconv::process::kProcessSavedUserId;
+    using ::opentelemetry::semconv::process::kProcessSavedUserName;
+    using ::opentelemetry::semconv::process::kProcessSessionLeaderPid;
+    using ::opentelemetry::semconv::process::kProcessUserId;
+    using ::opentelemetry::semconv::process::kProcessUserName;
 #endif
 
 #ifndef _WIN32
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessPid]            = getpid();
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessParentPid]      = getppid();
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessGroupLeaderPid] = getpgid(0);
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessInteractive] =
-        isatty(STDIN_FILENO) == 1 || isatty(STDOUT_FILENO) == 1 || isatty(STDERR_FILENO) == 1;
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSessionLeaderPid] = getsid(0);
+    if (const auto cmdline = get_command_line_args(); !cmdline.empty()) {
+        attrs[kProcessCommand]     = cmdline[0];
+        attrs[kProcessCommandArgs] = cmdline;
+    }
 #else
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessPid] =
-        static_cast<std::int64_t>(GetCurrentProcessId());
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessParentPid] =
-        static_cast<std::int64_t>(getppid(GetCurrentProcessId()));
+    attrs[kProcessCommandLine] = convert(GetCommandLine());
+#endif
+
+#ifndef _WIN32
+    attrs[kProcessPid]            = getpid();
+    attrs[kProcessParentPid]      = getppid();
+    attrs[kProcessGroupLeaderPid] = getpgid(0);
+    attrs[kProcessInteractive] = isatty(STDIN_FILENO) == 1 || isatty(STDOUT_FILENO) == 1 || isatty(STDERR_FILENO) == 1;
+    attrs[kProcessSessionLeaderPid] = getsid(0);
+#else
+    attrs[kProcessPid]       = static_cast<std::int64_t>(GetCurrentProcessId());
+    attrs[kProcessParentPid] = static_cast<std::int64_t>(getppid(GetCurrentProcessId()));
 
     int stdin_fileno  = _fileno(stdin);
     int stdout_fileno = _fileno(stdout);
     int stderr_fileno = _fileno(stderr);
 
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessInteractive] =
-        (stdin_fileno >= 0 && isatty(stdin_fileno) == 1) || (stdout_fileno >= 0 && isatty(stdout_fileno) == 1) ||
-        (stderr_fileno >= 0 && isatty(stderr_fileno) == 1);
+    attrs[kProcessInteractive] = (stdin_fileno >= 0 && isatty(stdin_fileno) == 1) ||
+                                 (stdout_fileno >= 0 && isatty(stdout_fileno) == 1) ||
+                                 (stderr_fileno >= 0 && isatty(stderr_fileno) == 1);
 #endif
 
 #if defined(__APPLE__)
     uid_t ruid = getuid();
     uid_t euid = geteuid();
 
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserId] = ruid;
-    attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserId]     = euid;
+    attrs[kProcessRealUserId] = ruid;
+    attrs[kProcessUserId]     = euid;
 #elif defined(__linux__)
     uid_t ruid;  // NOLINT(*-init-variables)
     uid_t euid;  // NOLINT(*-init-variables)
     uid_t suid;  // NOLINT(*-init-variables)
 
     if (getresuid(&ruid, &euid, &suid) == 0) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserId]  = ruid;
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserId] = suid;
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserId]      = euid;
+        attrs[kProcessRealUserId]  = ruid;
+        attrs[kProcessSavedUserId] = suid;
+        attrs[kProcessUserId]      = euid;
     }
 #endif
 
 #ifndef _WIN32
     if (const auto username = username_by_uid(ruid); !username.empty()) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName] = username;
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner]        = username;
+        attrs[kProcessRealUserName] = username;
+        attrs[kProcessOwner]        = username;
     }
 
 #    ifndef __APPLE__
     if (const auto username = username_by_uid(suid); !username.empty()) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessSavedUserName] = username;
+        attrs[kProcessSavedUserName] = username;
     }
 #    endif
 
     if (const auto username = username_by_uid(euid); !username.empty()) {
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessUserName] = username;
+        attrs[kProcessUserName] = username;
     }
 #else
     std::array<TCHAR, UNLEN + 1> buf;
     if (auto size = static_cast<DWORD>(buf.size()); GetUserName(buf.data(), &size)) {
-        std::string username                                                             = convert(buf.data());
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessRealUserName] = username;
-        attrs[::opentelemetry::sdk::resource::SemanticConventions::kProcessOwner]        = username;
+        std::string username        = convert(buf.data());
+        attrs[kProcessRealUserName] = username;
+        attrs[kProcessOwner]        = username;
     }
 #endif
 
-    return ::opentelemetry::sdk::resource::Resource::Create(
-        attrs, ::opentelemetry::sdk::resource::SemanticConventions::kSchemaUrl
-    );
+    return ::opentelemetry::sdk::resource::Resource::Create(attrs, kSchemaUrl);
 }
 
 }  // namespace wwa::opentelemetry::resource

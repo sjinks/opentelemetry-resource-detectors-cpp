@@ -1,6 +1,5 @@
 #include "os_utils.h"
 
-#include <array>
 #include <string_view>
 #include <utility>
 
@@ -9,6 +8,7 @@
 #endif
 
 #if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ && __cplusplus >= 202002L && !defined(DISABLE_MPH)
+#    include <array>
 #    include <mph>
 #    define USE_MPH
 #    define CONTAINER           std::array
@@ -19,31 +19,45 @@
 #    define CONTAINER_CONSTEXPR const
 #endif
 
-#include <opentelemetry/sdk/resource/semantic_conventions.h>
+#include <opentelemetry/version.h>
+
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+#    include <opentelemetry/sdk/resource/semantic_conventions.h>
+#else
+#    include <opentelemetry/semconv/incubating/host_attributes.h>
+#    include <opentelemetry/semconv/incubating/os_attributes.h>
+#    include <opentelemetry/semconv/schema_url.h>
+#endif
 
 using std::literals::operator""sv;
 
 std::string get_host_arch(std::string_view machine)
 {
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+    using namespace ::opentelemetry::sdk::resource::SemanticConventions::HostArchValues;
+#else
+    using namespace ::opentelemetry::semconv::host::HostArchValues;
+#endif
+
     static CONTAINER_CONSTEXPR auto machine_to_arch = CONTAINER{
-        std::pair{"x86_64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64},
-        std::pair{"amd64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kAmd64},
-        std::pair{"aarch64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64},
-        std::pair{"arm64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm64},
-        std::pair{"arm"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm32},
-        std::pair{"armv7l"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kArm32},
-        std::pair{"ppc"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc32},
-        std::pair{"ppc64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc64},
-        std::pair{"ppc64le"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kPpc64},
-        std::pair{"s390x"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kS390x},
-        std::pair{"i386"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"i486"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"i586"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"i686"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"x86"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"i86pc"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"x86pc"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kX86},
-        std::pair{"ia64"sv, opentelemetry::sdk::resource::SemanticConventions::HostArchValues::kIa64}
+        std::pair{"x86_64"sv, kAmd64},
+        std::pair{"amd64"sv, kAmd64},
+        std::pair{"aarch64"sv, kArm64},
+        std::pair{"arm64"sv, kArm64},
+        std::pair{"arm"sv, kArm32},
+        std::pair{"armv7l"sv, kArm32},
+        std::pair{"ppc"sv, kPpc32},
+        std::pair{"ppc64"sv, kPpc64},
+        std::pair{"ppc64le"sv, kPpc64},
+        std::pair{"s390x"sv, kS390x},
+        std::pair{"i386"sv, kX86},
+        std::pair{"i486"sv, kX86},
+        std::pair{"i586"sv, kX86},
+        std::pair{"i686"sv, kX86},
+        std::pair{"x86"sv, kX86},
+        std::pair{"i86pc"sv, kX86},
+        std::pair{"x86pc"sv, kX86},
+        std::pair{"ia64"sv, kIa64}
     };
 
 #ifdef USE_MPH
@@ -61,18 +75,24 @@ std::string get_host_arch(std::string_view machine)
 
 std::string get_os_type(std::string_view os)
 {
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 18
+    using namespace ::opentelemetry::sdk::resource::SemanticConventions::OsTypeValues;
+#else
+    using namespace ::opentelemetry::semconv::os::OsTypeValues;
+#endif
+
     static CONTAINER_CONSTEXPR auto os_to_type = CONTAINER{
-        std::pair{"Linux"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kLinux},
-        std::pair{"Windows_NT"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kWindows},
-        std::pair{"DragonFly"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kDragonflybsd},
-        std::pair{"FreeBSD"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kFreebsd},
-        std::pair{"HP-UX"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kHpux},
-        std::pair{"AIX"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kAix},
-        std::pair{"Darwin"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kDarwin},
-        std::pair{"NetBSD"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kNetbsd},
-        std::pair{"OpenBSD"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kOpenbsd},
-        std::pair{"SunOS"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kSolaris},
-        std::pair{"OS/390"sv, opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kZOs}
+        std::pair{"Linux"sv, kLinux},
+        std::pair{"Windows_NT"sv, kWindows},
+        std::pair{"DragonFly"sv, kDragonflybsd},
+        std::pair{"FreeBSD"sv, kFreebsd},
+        std::pair{"HP-UX"sv, kHpux},
+        std::pair{"AIX"sv, kAix},
+        std::pair{"Darwin"sv, kDarwin},
+        std::pair{"NetBSD"sv, kNetbsd},
+        std::pair{"OpenBSD"sv, kOpenbsd},
+        std::pair{"SunOS"sv, kSolaris},
+        std::pair{"OS/390"sv, kZOs}
     };
 
 #ifdef USE_MPH
@@ -86,7 +106,7 @@ std::string get_os_type(std::string_view os)
 #endif
 
     if (os.starts_with("CYGWIN") || os.starts_with("MINGW") || os.starts_with("MSYS")) {
-        return opentelemetry::sdk::resource::SemanticConventions::OsTypeValues::kWindows;
+        return kWindows;
     }
 
     return {os.data(), os.length()};
