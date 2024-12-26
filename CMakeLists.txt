@@ -14,19 +14,21 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 option(WITH_TESTING "Whether to enable tests" ON)
 option(WITH_EXAMPLES "Whether to enable examples" ON)
+option(WITH_MPH "Whether to use mph" ON)
 option(INSTALL_RESOURCE_DETECTORS "Whether to install Resource Detectors" ON)
-
-include(FetchContent)
 
 find_package(opentelemetry-cpp CONFIG REQUIRED)
 
-FetchContent_Declare(
-    qlibs_mph
-    GIT_REPOSITORY https://github.com/qlibs/mph
-    GIT_TAG v5.0.4
-)
+if(WITH_MPH)
+    include(FetchContent)
+    FetchContent_Declare(
+        qlibs_mph
+        GIT_REPOSITORY https://github.com/qlibs/mph
+        GIT_TAG v5.0.4
+    )
 
-FetchContent_MakeAvailable(qlibs_mph)
+    FetchContent_MakeAvailable(qlibs_mph)
+endif()
 
 add_library(utils OBJECT)
 target_sources(
@@ -38,13 +40,14 @@ target_sources(
         src/string_utils.cpp
 )
 
-target_link_libraries(
-    utils
-    PUBLIC opentelemetry-cpp::resources
-    PRIVATE qlibs_mph
-)
+target_link_libraries(utils PUBLIC opentelemetry-cpp::resources)
 
-target_include_directories(utils PUBLIC ${qlibs_mph_SOURCE_DIR})
+if(WITH_MPH)
+    target_link_libraries(utils PRIVATE qlibs_mph)
+    target_include_directories(utils PUBLIC ${qlibs_mph_SOURCE_DIR})
+else()
+    target_compile_definitions(utils PRIVATE DISABLE_MPH)
+endif()
 
 add_library(helpers STATIC $<TARGET_OBJECTS:utils>)
 target_include_directories(helpers PUBLIC ${CMAKE_SOURCE_DIR}/src)
