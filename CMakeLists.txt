@@ -23,7 +23,7 @@ find_package(opentelemetry-cpp CONFIG REQUIRED)
 FetchContent_Declare(
     qlibs_mph
     GIT_REPOSITORY https://github.com/qlibs/mph
-    GIT_TAG v5.0.2
+    GIT_TAG v5.0.4
 )
 
 FetchContent_MakeAvailable(qlibs_mph)
