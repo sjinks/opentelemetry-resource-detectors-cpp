@@ -3,6 +3,10 @@
   "extends": [
     "local>sjinks/.github:renovate-config"
   ],
+  "git-submodules": {
+    "enabled": true,
+    "versioning": "loose"
+  },
   "customManagers": [
     {
       "customType": "regex",
