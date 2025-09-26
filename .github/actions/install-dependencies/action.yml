@@ -14,7 +14,7 @@ runs:
       run: echo "OPENTELEMETRY_CPP_VERSION=${OPENTELEMETRY_CPP_VERSION}" >> "${GITHUB_ENV}"
       env:
         # renovate: datasource=github-releases depName=open-telemetry/opentelemetry-cpp
-        OPENTELEMETRY_CPP_VERSION: v1.22.0
+        OPENTELEMETRY_CPP_VERSION: v1.23.0
 
     - name: Make /usr/local/include and /usr/local/lib writable
       shell: bash
