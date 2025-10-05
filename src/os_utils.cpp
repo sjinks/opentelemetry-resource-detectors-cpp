@@ -93,7 +93,11 @@ std::string get_os_type(std::string_view os)
         std::pair{"NetBSD"sv, kNetbsd},
         std::pair{"OpenBSD"sv, kOpenbsd},
         std::pair{"SunOS"sv, kSolaris},
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 22
         std::pair{"OS/390"sv, kZOs}
+#else
+        std::pair{"OS/390"sv, kZos}
+#endif
     };
 
 #ifdef USE_MPH
