@@ -24,7 +24,7 @@ if(WITH_MPH)
     FetchContent_Declare(
         qlibs_mph
         GIT_REPOSITORY https://github.com/qlibs/mph
-        GIT_TAG v5.0.4
+        GIT_TAG v5.0.5
     )
 
     FetchContent_MakeAvailable(qlibs_mph)
