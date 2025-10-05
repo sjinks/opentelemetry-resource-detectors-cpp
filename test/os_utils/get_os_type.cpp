@@ -30,6 +30,12 @@ TEST_P(GetOsTypeTest, get_os_type)
     EXPECT_EQ(actual, expected);
 }
 
+#if OPENTELEMETRY_VERSION_MAJOR == 1 && OPENTELEMETRY_VERSION_MINOR < 22
+static constexpr const char* z_os = kZOs;
+#else
+static constexpr const char* z_os = kZos;
+#endif
+
 INSTANTIATE_TEST_SUITE_P(
     Table,
     GetOsTypeTest,
@@ -52,7 +58,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple("NetBSD", kNetbsd),
         std::make_tuple("OpenBSD", kOpenbsd),
         std::make_tuple("SunOS", kSolaris),
-        std::make_tuple("OS/390", kZOs),
+        std::make_tuple("OS/390", z_os),
         std::make_tuple("UNKNOWN", "UNKNOWN")
     )
 );
