@@ -2,11 +2,17 @@
 
 #include <string>
 #include <string_view>
+#include <version>
 
 #ifndef _WIN32
 #    include <sys/utsname.h>
 #else
 #    include <array>
+#    if defined(__cpp_lib_format)
+#        include <format>
+#    else
+#        include <sstream>
+#    endif
 
 #    include <windows.h>
 
@@ -93,12 +99,14 @@ namespace wwa::opentelemetry::resource {
     OSVERSIONINFO osvi{};
     osvi.dwOSVersionInfoSize = sizeof(osvi);
     if (GetVersionEx(&osvi)) {
-        attrs[kOsVersion] = std::to_string(osvi.dwMajorVersion)
-                                .append(".")
-                                .append(std::to_string(osvi.dwMinorVersion))
-                                .append(" (Build ")
-                                .append(std::to_string(osvi.dwBuildNumber))
-                                .append(")");
+#    if defined(__cpp_lib_format)
+        attrs[kOsVersion] =
+            std::format("{}.{} (Build {})", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
+#    else
+        std::ostringstream ss;
+        ss << osvi.dwMajorVersion << '.' << osvi.dwMinorVersion << " (Build " << osvi.dwBuildNumber << ')';
+        attrs[kOsVersion] = ss.str();
+#    endif
     }
 #endif
 

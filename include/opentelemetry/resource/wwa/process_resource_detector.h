@@ -11,7 +11,7 @@ namespace wwa::opentelemetry::resource {
 class WWA_OPENTELEMETRY_RESOURCE_DETECTORS_EXPORT process_resource_detector
     : public ::opentelemetry::sdk::resource::ResourceDetector {
 public:
-    ::opentelemetry::sdk::resource::Resource Detect() override;
+    [[nodiscard]] ::opentelemetry::sdk::resource::Resource Detect() override;
 };
 
 }  // namespace wwa::opentelemetry::resource

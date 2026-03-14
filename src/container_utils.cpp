@@ -100,7 +100,7 @@ std::string_view extract_container_id_cgroup_v2(std::string_view line)
     // MountID ParentID Major:Minor Root
     if (auto root = nth_word(line, 4); ends_with(root, "/hostname")) {
         const auto parts = split(root, '/');
-        auto it          = std::adjacent_find(parts.begin(), parts.end(), [](const auto& a, const auto& b) {
+        auto it          = std::ranges::adjacent_find(parts, [](const auto& a, const auto& b) {
             // NOLINTNEXTLINE(*-magic-numbers)
             return (a == "containers" || a == "overlay-containers") && b.size() == 64 &&
                    b.find_first_not_of("0123456789abcdefABCDEF") == std::string_view::npos;

@@ -2,8 +2,9 @@
 
 std::vector<std::string_view> split(std::string_view str, char delim)
 {
+    constexpr std::size_t initial_capacity = 10U;
     std::vector<std::string_view> tokens;
-    tokens.reserve(10);  // NOLINT(*-magic-numbers)
+    tokens.reserve(initial_capacity);
 
     std::string_view::size_type start = 0;
     std::string_view::size_type end   = 0;
@@ -17,7 +18,7 @@ std::vector<std::string_view> split(std::string_view str, char delim)
     return tokens;
 }
 
-bool starts_with(std::string_view str, std::string_view prefix)
+bool starts_with(std::string_view str, std::string_view prefix) noexcept
 {
 #if __cplusplus >= 202002L
     return str.starts_with(prefix);
@@ -26,7 +27,7 @@ bool starts_with(std::string_view str, std::string_view prefix)
 #endif
 }
 
-bool ends_with(std::string_view str, std::string_view suffix)
+bool ends_with(std::string_view str, std::string_view suffix) noexcept
 {
 #if __cplusplus >= 202002L
     return str.ends_with(suffix);
@@ -44,7 +45,7 @@ std::string_view nth_word(std::string_view str, std::size_t n)
     while (start != std::string_view::npos && end != std::string_view::npos) {
         end = str.find(' ', start);
         if (word_count == n) {
-            return str.substr(start, end - start);
+            return end != std::string_view::npos ? str.substr(start, end - start) : str.substr(start);
         }
 
         start = str.find_first_not_of(' ', end + 1);

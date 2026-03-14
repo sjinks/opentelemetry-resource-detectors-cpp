@@ -33,8 +33,32 @@ namespace wwa::opentelemetry::resource {
 #ifdef _WIN32
 int isatty(int fd)
 {
-    DWORD fileType = GetFileType(reinterpret_cast<HANDLE>(_get_osfhandle(fd)));
-    return fileType == FILE_TYPE_CHAR ? 1 : 0;
+    // _get_osfhandle returns -1 on error. Treat invalid handles as non-tty.
+    intptr_t osfh = _get_osfhandle(fd);
+    if (osfh == -1) {
+        return 0;
+    }
+
+    HANDLE handle = reinterpret_cast<HANDLE>(osfh);
+    if (handle == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    DWORD fileType = GetFileType(handle);
+    if (fileType == FILE_TYPE_CHAR) {
+        // FILE_TYPE_CHAR typically indicates console or serial; prefer GetConsoleMode
+        // to ensure this is an interactive console handle rather than a legacy
+        // character device.
+        DWORD mode = 0;
+        if (GetConsoleMode(handle, &mode) != 0) {
+            return 1;
+        }
+
+        // If GetConsoleMode fails, conservatively treat as non-tty.
+        return 0;
+    }
+
+    return 0;
 }
 
 DWORD getppid(DWORD pid)
@@ -43,6 +67,16 @@ DWORD getppid(DWORD pid)
     if (hSnapshot == INVALID_HANDLE_VALUE) {
         return 0;
     }
+
+    struct HandleGuard {
+        HANDLE handle;
+        ~HandleGuard()
+        {
+            if (this->handle != INVALID_HANDLE_VALUE) {
+                CloseHandle(this->handle);
+            }
+        }
+    } guard{hSnapshot};
 
     DWORD parentPid = 0;
     PROCESSENTRY32 pe32;
@@ -56,7 +90,6 @@ DWORD getppid(DWORD pid)
         } while (Process32Next(hSnapshot, &pe32));
     }
 
-    CloseHandle(hSnapshot);
     return parentPid;
 }
 #endif
@@ -129,6 +162,8 @@ DWORD getppid(DWORD pid)
                                  (stderr_fileno >= 0 && isatty(stderr_fileno) == 1);
 #endif
 
+    bool has_uids = true;
+
 #if defined(__APPLE__)
     uid_t ruid = getuid();
     uid_t euid = geteuid();
@@ -145,22 +180,27 @@ DWORD getppid(DWORD pid)
         attrs[kProcessSavedUserId] = suid;
         attrs[kProcessUserId]      = euid;
     }
+    else {
+        has_uids = false;
+    }
 #endif
 
 #ifndef _WIN32
-    if (const auto username = username_by_uid(ruid); !username.empty()) {
-        attrs[kProcessRealUserName] = username;
-        attrs[kProcessOwner]        = username;
-    }
+    if (has_uids) {
+        if (const auto username = username_by_uid(ruid); !username.empty()) {
+            attrs[kProcessRealUserName] = username;
+            attrs[kProcessOwner]        = username;
+        }
 
 #    ifndef __APPLE__
-    if (const auto username = username_by_uid(suid); !username.empty()) {
-        attrs[kProcessSavedUserName] = username;
-    }
+        if (const auto username = username_by_uid(suid); !username.empty()) {
+            attrs[kProcessSavedUserName] = username;
+        }
 #    endif
 
-    if (const auto username = username_by_uid(euid); !username.empty()) {
-        attrs[kProcessUserName] = username;
+        if (const auto username = username_by_uid(euid); !username.empty()) {
+            attrs[kProcessUserName] = username;
+        }
     }
 #else
     std::array<TCHAR, UNLEN + 1> buf;
