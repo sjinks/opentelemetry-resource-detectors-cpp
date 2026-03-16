@@ -32,7 +32,7 @@ runs:
         key: ${{ runner.os }}-opentelemetry-${{ env.OPENTELEMETRY_CPP_VERSION }}
 
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
+      uses: hendrikmuhs/ccache-action@1bbbcda0748b3e340dee71a314fa68ffcbd6df79 # v1.2.21
       if: steps.cache-opentelemetry.outputs.cache-hit != 'true'
 
     - name: Install OpenTelemetry
