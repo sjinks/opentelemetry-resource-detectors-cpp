@@ -133,7 +133,7 @@ std::string username_by_uid(uid_t uid)
     std::string buf(static_cast<std::size_t>(bufsize), '\0');
     passwd pwd{};
     passwd* result = nullptr;
-    int rc         = getpwuid_r(uid, &pwd, buf.data(), static_cast<std::size_t>(bufsize), &result);
+    const int rc   = getpwuid_r(uid, &pwd, buf.data(), static_cast<std::size_t>(bufsize), &result);
 
     if (result != nullptr && rc == 0) {  // NOSONAR
         return result->pw_name;
